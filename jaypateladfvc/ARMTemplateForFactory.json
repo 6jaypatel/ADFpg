@@ -108,9 +108,79 @@
 							"sink": {
 								"type": "CosmosDbMongoDbApiSink",
 								"writeBatchTimeout": "00:30:00",
-								"writeBehavior": "insert"
+								"writeBehavior": "upsert"
 							},
-							"enableStaging": false
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['messageId']"
+										},
+										"sink": {
+											"path": "$['messageId']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['deviceId']"
+										},
+										"sink": {
+											"path": "$['deviceId']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['temperature']"
+										},
+										"sink": {
+											"path": "$['temperature']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['humidity']"
+										},
+										"sink": {
+											"path": "$['humidity']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['EventProcessedUtcTime']"
+										},
+										"sink": {
+											"path": "$['EventProcessedUtcTime']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['PartitionId']"
+										},
+										"sink": {
+											"path": "$['PartitionId']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['EventEnqueuedUtcTime']"
+										},
+										"sink": {
+											"path": "$['EventEnqueuedUtcTime']"
+										}
+									},
+									{
+										"source": {
+											"path": "$['IoTHub']"
+										},
+										"sink": {
+											"path": "$['IoTHub']"
+										}
+									}
+								],
+								"collectionReference": ""
+							}
 						},
 						"inputs": [
 							{
