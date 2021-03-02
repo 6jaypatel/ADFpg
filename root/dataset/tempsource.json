@@ -1,0 +1,64 @@
+{
+	"name": "tempsource",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "IOT storage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "0_92992dd969fa4f0db13c092598f91552_1.json",
+				"container": "iot-container"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"messageId": {
+					"type": "integer"
+				},
+				"deviceId": {
+					"type": "string"
+				},
+				"temperature": {
+					"type": "number"
+				},
+				"humidity": {
+					"type": "number"
+				},
+				"EventProcessedUtcTime": {
+					"type": "string"
+				},
+				"PartitionId": {
+					"type": "integer"
+				},
+				"EventEnqueuedUtcTime": {
+					"type": "string"
+				},
+				"IoTHub": {
+					"type": "object",
+					"properties": {
+						"MessageId": {
+							"type": "null"
+						},
+						"CorrelationId": {
+							"type": "null"
+						},
+						"ConnectionDeviceId": {
+							"type": "string"
+						},
+						"ConnectionDeviceGenerationId": {
+							"type": "string"
+						},
+						"EnqueuedTime": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	}
+}
