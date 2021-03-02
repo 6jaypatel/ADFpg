@@ -59,7 +59,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "tempOutputfile",
+						"referenceName": "newtempoutputjson",
 						"type": "DatasetReference"
 					}
 				],
