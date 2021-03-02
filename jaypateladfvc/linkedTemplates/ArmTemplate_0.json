@@ -590,6 +590,75 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/newsourceIOT')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "IOT storage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "0_ba7d12902186472dbad0a2e399368eb7_1.json",
+						"container": "iot-container"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"messageId": {
+							"type": "integer"
+						},
+						"deviceId": {
+							"type": "string"
+						},
+						"temperature": {
+							"type": "number"
+						},
+						"humidity": {
+							"type": "number"
+						},
+						"EventProcessedUtcTime": {
+							"type": "string"
+						},
+						"PartitionId": {
+							"type": "integer"
+						},
+						"EventEnqueuedUtcTime": {
+							"type": "string"
+						},
+						"IoTHub": {
+							"type": "object",
+							"properties": {
+								"MessageId": {
+									"type": "null"
+								},
+								"CorrelationId": {
+									"type": "null"
+								},
+								"ConnectionDeviceId": {
+									"type": "string"
+								},
+								"ConnectionDeviceGenerationId": {
+									"type": "string"
+								},
+								"EnqueuedTime": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/IOT storage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -599,7 +668,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "tempsource",
+								"referenceName": "newsourceIOT",
 								"type": "DatasetReference"
 							},
 							"name": "IOTsource"
@@ -629,11 +698,11 @@
 							"name": "AlterRow1"
 						}
 					],
-					"script": "source(output(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHub as (MessageId as string, CorrelationId as string, ConnectionDeviceId as string, ConnectionDeviceGenerationId as string, EnqueuedTime as string)\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine') ~> IOTsource\nIOTsource split(temperature > 25,\n\ttemperature<= 25,\n\tdisjoint: true) ~> ConditionalSplit1@(Tempgreater25, Tempnotgreater25)\nConditionalSplit1@Tempgreater25 alterRow(upsertIf(true())) ~> AlterRow1\nAlterRow1 sink(input(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHubMessageId as string,\n\t\tIoTHubCorrelationId as string,\n\t\tIoTHubConnectionDeviceId as string,\n\t\tIoTHubConnectionDeviceGenerationId as string,\n\t\tIoTHubEnqueuedTime as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['messageId'],\n\tformat: 'table',\n\tmapColumn(\n\t\tmessageId,\n\t\tdeviceId,\n\t\ttemperature,\n\t\thumidity,\n\t\tEventProcessedUtcTime,\n\t\tPartitionId,\n\t\tEventEnqueuedUtcTime,\n\t\tIoTHubMessageId = IoTHub.MessageId,\n\t\tIoTHubCorrelationId = IoTHub.CorrelationId,\n\t\tIoTHubConnectionDeviceId = IoTHub.ConnectionDeviceId,\n\t\tIoTHubConnectionDeviceGenerationId = IoTHub.ConnectionDeviceGenerationId,\n\t\tIoTHubEnqueuedTime = IoTHub.EnqueuedTime\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> RDBMSsink\nConditionalSplit1@Tempnotgreater25 sink(input(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHub as (MessageId as string, CorrelationId as string, ConnectionDeviceId as string, ConnectionDeviceGenerationId as string, EnqueuedTime as string)\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> tempjsonoutput"
+					"script": "source(output(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHub as (MessageId as string, CorrelationId as string, ConnectionDeviceId as string, ConnectionDeviceGenerationId as string, EnqueuedTime as string)\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine') ~> IOTsource\nIOTsource split(temperature > 25,\n\ttemperature<= 25,\n\tdisjoint: true) ~> ConditionalSplit1@(Tempgreater25, Tempnotgreater25)\nConditionalSplit1@Tempgreater25 alterRow(upsertIf(true())) ~> AlterRow1\nAlterRow1 sink(input(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHubMessageId as string,\n\t\tIoTHubCorrelationId as string,\n\t\tIoTHubConnectionDeviceId as string,\n\t\tIoTHubConnectionDeviceGenerationId as string,\n\t\tIoTHubEnqueuedTime as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['messageId'],\n\tformat: 'table',\n\tmapColumn(\n\t\tmessageId,\n\t\tdeviceId,\n\t\ttemperature,\n\t\thumidity,\n\t\tEventProcessedUtcTime,\n\t\tPartitionId,\n\t\tEventEnqueuedUtcTime,\n\t\tIoTHubMessageId = IoTHub.MessageId,\n\t\tIoTHubCorrelationId = IoTHub.CorrelationId,\n\t\tIoTHubConnectionDeviceId = IoTHub.ConnectionDeviceId,\n\t\tIoTHubConnectionDeviceGenerationId = IoTHub.ConnectionDeviceGenerationId,\n\t\tIoTHubEnqueuedTime = IoTHub.EnqueuedTime\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> RDBMSsink\nConditionalSplit1@Tempnotgreater25 sink(input(\n\t\tmessageId as string,\n\t\tdeviceId as string,\n\t\ttemperature as double,\n\t\thumidity as double,\n\t\tEventProcessedUtcTime as string,\n\t\tPartitionId as string,\n\t\tEventEnqueuedUtcTime as string,\n\t\tIoTHub as (MessageId as string, CorrelationId as string, ConnectionDeviceId as string, ConnectionDeviceGenerationId as string, EnqueuedTime as string)\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['templessthan25.json'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> tempjsonoutput"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/tempsource')]",
+				"[concat(variables('factoryId'), '/datasets/newsourceIOT')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlTable1')]",
 				"[concat(variables('factoryId'), '/datasets/tempOutputfile')]"
 			]
